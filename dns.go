@@ -83,15 +83,16 @@ func (d *DNSServer) handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	m.SetReply(r)
 
 	if r.Opcode == dns.OpcodeQuery {
-		d.readQuery(m)
+		d.readQuery(m,w.RemoteAddr().String())
 	}
 	w.WriteMsg(m)
+
 }
 
-func (d *DNSServer) readQuery(m *dns.Msg) {
+func (d *DNSServer) readQuery(m *dns.Msg, ip string) {
 	var authoritative = false
 	for _, que := range m.Question {
-		if rr, rc, auth, err := d.answer(que); err == nil {
+		if rr, rc, auth, err := d.answer(que,ip); err == nil {
 			if auth {
 				authoritative = auth
 			}
@@ -150,7 +151,7 @@ func (d *DNSServer) isAuthoritative(q dns.Question) bool {
 	return false
 }
 
-func (d *DNSServer) answer(q dns.Question) ([]dns.RR, int, bool, error) {
+func (d *DNSServer) answer(q dns.Question,ip string) ([]dns.RR, int, bool, error) {
 	var rcode int
 	var authoritative = d.isAuthoritative(q)
 	if !d.answeringForDomain(q.Name) {
@@ -173,7 +174,7 @@ func (d *DNSServer) answer(q dns.Question) ([]dns.RR, int, bool, error) {
 	if q.Qtype == dns.TypeOPT {
 		return []dns.RR{}, dns.RcodeFormatError, authoritative, nil
 	}
-	log.WithFields(log.Fields{"qtype": dns.TypeToString[q.Qtype], "domain": q.Name, "rcode": dns.RcodeToString[rcode]}).Debug("Answering question for domain")
+	log.WithFields(log.Fields{"qtype": dns.TypeToString[q.Qtype], "domain": q.Name, "ip": ip,"rcode": dns.RcodeToString[rcode]}).Debug("DNS:Answering question for domain")
 	return r, rcode, authoritative, nil
 }
 
