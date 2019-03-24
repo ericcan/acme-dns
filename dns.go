@@ -84,7 +84,7 @@ func (d *DNSServer) handleRequest(w dns.ResponseWriter, r *dns.Msg) {
 	m.SetReply(r)
 
 	if r.Opcode == dns.OpcodeQuery {
-		d.LastIP=w.RemoteAddr().String()
+		d.LastIP = w.RemoteAddr().String()
 		d.readQuery(m)
 	}
 	w.WriteMsg(m)
@@ -176,7 +176,8 @@ func (d *DNSServer) answer(q dns.Question) ([]dns.RR, int, bool, error) {
 	if q.Qtype == dns.TypeOPT {
 		return []dns.RR{}, dns.RcodeFormatError, authoritative, nil
 	}
-	log.WithFields(log.Fields{"qtype": dns.TypeToString[q.Qtype], "domain": q.Name, "ip": d.LastIP,"rcode": dns.RcodeToString[rcode]}).Debug("DNS:Answering question for domain")
+	ip := strings.Split(d.LastIP, ":")
+	log.WithFields(log.Fields{"qtype": dns.TypeToString[q.Qtype], "domain": q.Name, "ip": ip[0], "rcode": dns.RcodeToString[rcode]}).Debug("DNS:Answering question for domain")
 	return r, rcode, authoritative, nil
 }
 
