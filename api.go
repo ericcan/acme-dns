@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
 	log "github.com/sirupsen/logrus"
@@ -56,7 +57,8 @@ func webRegisterPost(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 		regStatus = http.StatusInternalServerError
 		log.WithFields(log.Fields{"error": err.Error()}).Debug("Error in registration")
 	} else {
-		log.WithFields(log.Fields{"user": nu.Username.String()}).Debug("Created new user")
+		ip := strings.Split(r.RemoteAddr, ":")
+		log.WithFields(log.Fields{"user": nu.Username.String(), "ip": ip[0]}).Debug("Created new user")
 		regStruct := RegResponse{nu.Username.String(), nu.Password, nu.Subdomain + "." + Config.General.Domain, nu.Subdomain, nu.AllowFrom.ValidEntries()}
 		regStatus = http.StatusCreated
 		reg, err = json.Marshal(regStruct)
