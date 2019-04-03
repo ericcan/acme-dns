@@ -54,6 +54,7 @@ type httpapi struct {
 	CorsOrigins         []string
 	UseHeader           bool   `toml:"use_header"`
 	HeaderName          string `toml:"header_name"`
+	AllowIP				string
 }
 
 // Logging config

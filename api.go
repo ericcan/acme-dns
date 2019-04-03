@@ -50,24 +50,30 @@ func webRegisterPost(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 	}
 
 	// Create new user
-	nu, err := DB.Register(aTXT.AllowFrom)
-	if err != nil {
-		errstr := fmt.Sprintf("%v", err)
-		reg = jsonError(errstr)
-		regStatus = http.StatusInternalServerError
-		log.WithFields(log.Fields{"error": err.Error()}).Debug("Error in registration")
-	} else {
-		ip := strings.Split(r.RemoteAddr, ":")
-		log.WithFields(log.Fields{"user": nu.Username.String(), "ip": ip[0]}).Debug("Created new user")
-		regStruct := RegResponse{nu.Username.String(), nu.Password, nu.Subdomain + "." + Config.General.Domain, nu.Subdomain, nu.AllowFrom.ValidEntries()}
-		regStatus = http.StatusCreated
-		reg, err = json.Marshal(regStruct)
+	ip := strings.Split(r.RemoteAddr, ":")
+	if ip[0] == Config.API.AllowIP {
+		nu, err := DB.Register(aTXT.AllowFrom)
 		if err != nil {
+			errstr := fmt.Sprintf("%v", err)
+			reg = jsonError(errstr)
 			regStatus = http.StatusInternalServerError
-			reg = jsonError("json_error")
-			log.WithFields(log.Fields{"error": "json"}).Debug("Could not marshal JSON")
+			log.WithFields(log.Fields{"error": err.Error()}).Debug("Error in registration")
+		} else {
+			log.WithFields(log.Fields{"user": nu.Username.String(), "ip": ip[0]}).Debug("Created new user")
+			regStruct := RegResponse{nu.Username.String(), nu.Password, nu.Subdomain + "." + Config.General.Domain, nu.Subdomain, nu.AllowFrom.ValidEntries()}
+			regStatus = http.StatusCreated
+			reg, err = json.Marshal(regStruct)
+			if err != nil {
+				regStatus = http.StatusInternalServerError
+				reg = jsonError("json_error")
+				log.WithFields(log.Fields{"error": "json"}).Debug("Could not marshal JSON")
+			}
 		}
-	}
+	} else {
+		regStatus = http.StatusInternalServerError
+		reg = jsonError("invalid IP")
+		log.WithFields(log.Fields{"ip": ip[0], "expected": Config.API.AllowIP}).Debug("Prevented Registration wrong IP")
+	}		
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(regStatus)
 	w.Write(reg)
