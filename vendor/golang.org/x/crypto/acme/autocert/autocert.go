@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/acme"
+	log "github.com/sirupsen/logrus"
 )
 
 // createCertRetryAfter is how much time to wait before removing a failed state
@@ -877,6 +878,7 @@ func httpTokenCacheKey(tokenPath string) string {
 // The key argument is a certificate private key.
 // The exp argument is the cert expiration time (NotAfter).
 func (m *Manager) renew(ck certKey, key crypto.Signer, exp time.Time) {
+	log.WithFields(log.Fields{"next": 0}).Debug("Renew called on manager")
 	m.renewalMu.Lock()
 	defer m.renewalMu.Unlock()
 	if m.renewal[ck] != nil {
