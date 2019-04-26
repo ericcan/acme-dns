@@ -9,6 +9,7 @@ import (
 	"crypto"
 	"sync"
 	"time"
+	log "github.com/sirupsen/logrus"
 )
 
 // renewJitter is the maximum deviation from Manager.RenewBefore.
@@ -93,6 +94,7 @@ func (dr *domainRenewal) do(ctx context.Context) (time.Duration, error) {
 	// but we try nonetheless
 	if tlscert, err := dr.m.cacheGet(ctx, dr.ck); err == nil {
 		next := dr.next(tlscert.Leaf.NotAfter)
+		log.WithFields(log.Fields{"next": next}).Debug("Checking for renewal")
 		if next > dr.m.renewBefore()+renewJitter {
 			signer, ok := tlscert.PrivateKey.(crypto.Signer)
 			if ok {
