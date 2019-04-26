@@ -59,6 +59,7 @@ func (dr *domainRenewal) renew() {
 	if dr.timer == nil {
 		return
 	}
+	log.WithFields(log.Fields{"next": 0}).Debug("Renew called")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
