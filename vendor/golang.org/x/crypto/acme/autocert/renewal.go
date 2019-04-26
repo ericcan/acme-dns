@@ -138,6 +138,7 @@ func (dr *domainRenewal) next(expiry time.Time) time.Duration {
 	if d < 0 {
 		return 0
 	}
+	log.WithFields(log.Fields{"next": d}).Debug("Calling renewal next")
 	return d
 }
 
