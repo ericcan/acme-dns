@@ -59,7 +59,7 @@ func (dr *domainRenewal) renew() {
 	if dr.timer == nil {
 		return
 	}
-	log.WithFields(log.Fields{"next": 0}).Debug("Renew called")
+	log.WithFields(log.Fields{"next": 0}).Info("Renew called")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
@@ -95,7 +95,7 @@ func (dr *domainRenewal) do(ctx context.Context) (time.Duration, error) {
 	// but we try nonetheless
 	if tlscert, err := dr.m.cacheGet(ctx, dr.ck); err == nil {
 		next := dr.next(tlscert.Leaf.NotAfter)
-		log.WithFields(log.Fields{"next": next}).Debug("Checking for renewal")
+		log.WithFields(log.Fields{"next": next}).Info("Checking for renewal")
 		if next > dr.m.renewBefore()+renewJitter {
 			signer, ok := tlscert.PrivateKey.(crypto.Signer)
 			if ok {
@@ -138,7 +138,7 @@ func (dr *domainRenewal) next(expiry time.Time) time.Duration {
 	if d < 0 {
 		return 0
 	}
-	log.WithFields(log.Fields{"next": d}).Debug("Calling renewal next")
+	log.WithFields(log.Fields{"next": d}).Info("Calling renewal next")
 	return d
 }
 
