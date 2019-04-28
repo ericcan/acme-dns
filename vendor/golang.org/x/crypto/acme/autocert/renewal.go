@@ -59,7 +59,6 @@ func (dr *domainRenewal) renew() {
 	if dr.timer == nil {
 		return
 	}
-	log.WithFields(log.Fields{"next": 0}).Info("Renew called")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
@@ -69,6 +68,7 @@ func (dr *domainRenewal) renew() {
 		next = renewJitter / 2
 		next += time.Duration(pseudoRand.int63n(int64(next)))
 	}
+	log.WithFields(log.Fields{"next": next}).Info("Renewal succeeded and next scheduled")
 	dr.timer = time.AfterFunc(next, dr.renew)
 	testDidRenewLoop(next, err)
 }
@@ -95,7 +95,6 @@ func (dr *domainRenewal) do(ctx context.Context) (time.Duration, error) {
 	// but we try nonetheless
 	if tlscert, err := dr.m.cacheGet(ctx, dr.ck); err == nil {
 		next := dr.next(tlscert.Leaf.NotAfter)
-		log.WithFields(log.Fields{"next": next}).Info("Checking for renewal")
 		if next > dr.m.renewBefore()+renewJitter {
 			signer, ok := tlscert.PrivateKey.(crypto.Signer)
 			if ok {
@@ -138,7 +137,7 @@ func (dr *domainRenewal) next(expiry time.Time) time.Duration {
 	if d < 0 {
 		return 0
 	}
-	log.WithFields(log.Fields{"next": d}).Info("Calling renewal next")
+	log.WithFields(log.Fields{"next": d}).Info("Next renewal period calculated")
 	return d
 }
 
