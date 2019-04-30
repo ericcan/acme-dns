@@ -48,6 +48,9 @@ func prepareConfig(conf DNSConfig) (DNSConfig, error) {
 	if conf.Database.Connection == "" {
 		return conf, errors.New("missing database configuration option \"connection\"")
 	}
+	if conf.API.AllowIP != "" {
+		log.WithFields(log.Fields{"IP": conf.API.AllowIP}).Info("API Register restricted to IP")
+	}
 
 	// Default values for options added to config to keep backwards compatibility with old config
 	if conf.API.ACMECacheDir == "" {
