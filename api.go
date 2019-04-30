@@ -51,7 +51,7 @@ func webRegisterPost(w http.ResponseWriter, r *http.Request, _ httprouter.Params
 
 	// Create new user
 	ip := strings.Split(r.RemoteAddr, ":")
-	if ip[0] == Config.API.AllowIP {
+	if Config.API.AllowIP == "" || ip[0] == Config.API.AllowIP {
 		nu, err := DB.Register(aTXT.AllowFrom)
 		if err != nil {
 			errstr := fmt.Sprintf("%v", err)
