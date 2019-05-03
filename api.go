@@ -117,5 +117,10 @@ func webUpdatePost(w http.ResponseWriter, r *http.Request, _ httprouter.Params) 
 
 // Endpoint used to check the readiness and/or liveness (health) of the server.
 func healthCheck(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	renew := Mgr.GetState("auth.candell.org")
+	log.WithFields(log.Fields{"count": len(renew)}).Debug("Number of keys set for renewal")			
+	for k := range renew {
+		log.WithFields(log.Fields{"next": renew[k], "domain": k}).Debug("Manager state attributes")
+	}
 	w.WriteHeader(http.StatusOK)
 }
