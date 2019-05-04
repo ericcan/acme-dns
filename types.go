@@ -5,10 +5,15 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/acme/autocert"
+
 )
 
 // Config is global configuration struct
 var Config DNSConfig
+
+// Mgr is global Manager Structure
+var Mgr *autocert.Manager
 
 // DB is used to access the database functions in acme-dns
 var DB database

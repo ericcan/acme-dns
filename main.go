@@ -130,6 +130,7 @@ func startHTTPAPI(errChan chan error) {
 			Prompt:     autocert.AcceptTOS,
 			HostPolicy: autocert.HostWhitelist(Config.API.Domain),
 		}
+		Mgr = &m
 		autocerthost := Config.API.IP + ":" + Config.API.AutocertPort
 		log.WithFields(log.Fields{"autocerthost": autocerthost, "domain": Config.API.Domain}).Debug("Opening HTTP port for autocert")
 		go http.ListenAndServe(autocerthost, m.HTTPHandler(nil))
