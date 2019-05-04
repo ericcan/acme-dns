@@ -446,27 +446,31 @@ func (m *Manager) cert(ctx context.Context, ck certKey) (*tls.Certificate, error
 	go m.renew(ck, s.key, s.leaf.NotAfter)
 	return cert, nil
 }
+
+//Customized external method that reports the loaded certs and time to renew
+//This function also loads the RSA cert to state if not there
 func (m *Manager) GetState(domain string) (map[string]time.Duration) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 	
 	ck := certKey{
 		domain: strings.TrimSuffix(domain, "."), 
-		isRSA:  true,
+		isRSA:  true
 	}
 	_, err := m.cert(ctx, ck) //this can load in the RSA key
 	if err != nil {
 		log.WithFields(log.Fields{"error": err}).Info("Failed to load RSA cert")
 	}
 	//create a new map for return values
-	r := make(map[string]time.Duration)
+	r := make map[string]time.Duration
 	//step throuogh each of the renewals for m. 
-	for k,_ := range (m.renewal) {
-		r[k.String()] = m.state[k].leaf.NotAfter.Sub(m.now())-m.renewBefore()
+	for k,st := range m.state {
+		r[k.String()] = st.leaf.NotAfter.Sub(m.now()) - m.renewBefore()
 	}
 	//return the new map
 	return r
 }
+
 // cacheGet always returns a valid certificate, or an error otherwise.
 // If a cached certificate exists but is not valid, ErrCacheMiss is returned.
 func (m *Manager) cacheGet(ctx context.Context, ck certKey) (*tls.Certificate, error) {
