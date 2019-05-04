@@ -461,8 +461,8 @@ func (m *Manager) GetState(domain string) (map[string]time.Duration) {
 	//create a new map for return values
 	r := make(map[string]time.Duration)
 	//step throuogh each of the renewals for m. 
-	for k,dr := range (m.renewal) {
-		r[k.String()] = dr.next(m.state[k].leaf.NotAfter)
+	for k,_ := range (m.renewal) {
+		r[k.String()] = m.state[k].leaf.NotAfter.Sub(m.now())-m.renewBefore()
 	}
 	//return the new map
 	return r
