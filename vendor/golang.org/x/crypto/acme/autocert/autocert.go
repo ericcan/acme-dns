@@ -455,14 +455,14 @@ func (m *Manager) GetState(domain string) (map[string]time.Duration) {
 	
 	ck := certKey{
 		domain: strings.TrimSuffix(domain, "."), 
-		isRSA:  true
+		isRSA:  true,
 	}
 	_, err := m.cert(ctx, ck) //this can load in the RSA key
 	if err != nil {
 		log.WithFields(log.Fields{"error": err}).Info("Failed to load RSA cert")
 	}
 	//create a new map for return values
-	r := make map[string]time.Duration
+	r := make(map[string]time.Duration)
 	//step throuogh each of the renewals for m. 
 	for k,st := range m.state {
 		r[k.String()] = st.leaf.NotAfter.Sub(m.now()) - m.renewBefore()
