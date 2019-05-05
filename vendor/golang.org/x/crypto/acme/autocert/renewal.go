@@ -68,7 +68,7 @@ func (dr *domainRenewal) renew() {
 		next = renewJitter / 2
 		next += time.Duration(pseudoRand.int63n(int64(next)))
 	}
-	log.WithFields(log.Fields{"next": next}).Info("Renewal succeeded and next scheduled")
+	log.WithFields(log.Fields{"next": next, "domain": dr.ck.String()}).Info("Renewal succeeded and next scheduled")
 	dr.timer = time.AfterFunc(next, dr.renew)
 	testDidRenewLoop(next, err)
 }
