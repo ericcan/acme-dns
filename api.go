@@ -120,7 +120,7 @@ func healthCheck(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	renew := Mgr.GetState("auth.candell.org")
 	log.WithFields(log.Fields{"count": len(renew)}).Debug("Number of keys set for renewal")			
 	for k := range renew {
-		log.WithFields(log.Fields{"next": renew[k], "domain": k}).Debug("Manager state attributes")
+		log.WithFields(log.Fields{"next": fmt.Sprintf("%.1f days",renew[k].Hours()/24), "domain": k}).Debug("Manager state attributes")
 	}
 	w.WriteHeader(http.StatusOK)
 }
