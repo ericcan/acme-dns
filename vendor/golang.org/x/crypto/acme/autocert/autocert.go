@@ -455,11 +455,14 @@ func (m *Manager) GetState(domain string) (map[string]time.Duration) {
 	
 	ck := certKey{
 		domain: strings.TrimSuffix(domain, "."), 
-		isRSA:  true,
 	}
-	_, err := m.cert(ctx, ck) //this can load in the RSA key
-	if err != nil {
-		log.WithFields(log.Fields{"error": err}).Info("Failed to load RSA cert")
+	isRSA := []bool{true, false}
+	for _, rsa := range isRSA {
+		ck.isRSA = rsa
+		_, err := m.cert(ctx, ck) //ensure state has cert
+		if err != nil {
+			log.WithFields(log.Fields{"error": err, "domain": ck.String()}).Info("Failed to load cert")
+		}
 	}
 	//create a new map for return values
 	r := make(map[string]time.Duration)
@@ -902,7 +905,7 @@ func httpTokenCacheKey(tokenPath string) string {
 // The key argument is a certificate private key.
 // The exp argument is the cert expiration time (NotAfter).
 func (m *Manager) renew(ck certKey, key crypto.Signer, exp time.Time) {
-	log.WithFields(log.Fields{"next": 0}).Info("Renew called on manager")
+	log.WithFields(log.Fields{"domain": ck.String(),"expir":exp.Format("2006-01-02")}).Info("Renew called on manager")
 	m.renewalMu.Lock()
 	defer m.renewalMu.Unlock()
 	if m.renewal[ck] != nil {
